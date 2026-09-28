@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penilaian Tengah Semester - Al-Qur'an Hadist Kelas IX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .match-item { transition: all 0.2s; cursor: pointer; }
+        .match-item.selected { border-color: #15803d; background-color: #f0fdf4; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+            .shadow-lg { box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const INITIAL_QUESTIONS = [
+            // Pilihan Ganda (15 Soal)
+            { id: 1, type: 'pg', text: 'Perhatikan ilustrasi berikut! Dalam kehidupan sehari-hari, Pak Ahmad selalu berkata apa adanya, tidak pernah mengurangi takaran saat berdagang, dan selalu memenuhi janji kepada pelanggannya meskipun mengalami kerugian kecil. Sikap Pak Ahmad ini merupakan cerminan nyata dari penerapan perilaku...', options: ['Amanah dan ikhlas', 'Kejujuran dan integritas', 'Qanaah dan sabar', 'Tawakal dan istiqamah'], answer: 'Kejujuran dan integritas' },
+            { id: 2, type: 'pg', text: 'Secara istilah tajwid, hukum bacaan Mad Lazim Mukhaffaf Kilmi terjadi apabila ada mad thabi`i yang bertemu dengan huruf berbaris...', options: ['Sukun dalam satu kata', 'Tasydid dalam satu kata', 'Sukun dalam kalimat berbeda', 'Tanwin di akhir ayat'], answer: 'Sukun dalam satu kata' },
+            { id: 3, type: 'pg', text: 'Perhatikan potongan ayat berikut! Surat Yunus ayat 51 terdapat bacaan "Al-āna wa qad kuntum..." yang merupakan contoh hukum bacaan...', options: ['Mad Lazim Mukhaffaf Kilmi', 'Mad Lazim Mutsaqqal Kilmi', 'Mad Lazim Mutsaqqal Harfi', 'Mad Lazim Mukhaffaf Harfi'], answer: 'Mad Lazim Mukhaffaf Kilmi' },
+            { id: 4, type: 'pg', text: 'Dalam sebuah kisah teladan, seorang pemuda penggembala kambing diuji kejujurannya oleh Abdullah bin Umar dengan diminta menjual kambing tanpa sepengetahuan pemiliknya. Pemuda itu menolak karena Allah Maha Melihat. Pesan moral dari cerita ini berkaitan erat dengan konsep...', options: ['Pentingnya modal usaha', 'Nilai mutlak kejujuran dan integritas diri', 'Cara berternak yang baik', 'Keutamaan bersedekah rahasia'], answer: 'Nilai mutlak kejujuran dan integritas diri' },
+            { id: 5, type: 'pg', text: 'Arti harfiah dari kata "Mutsaqqal" dalam hukum bacaan Mad Lazim adalah...', options: ['Diringankan', 'Diberatkan atau ditebalkan dengan tasydid', 'Dipanjangkan tanpa batas', 'Dipendekkan'], answer: 'Diberatkan atau ditebalkan dengan tasydid' },
+            { id: 6, type: 'pg', text: 'Manakah di antara contoh berikut yang merupakan penerapan jujur dalam lingkungan madrasah/sekolah?', options: ['Mengerjakan ujian dengan hasil kerja sendiri tanpa menyontek', 'Datang ke sekolah hanya saat ada ulangan harian', 'Meminjam barang teman tanpa izin dengan niat mengembalikan', 'Hanya bersikap jujur kepada guru piket'], answer: 'Mengerjakan ujian dengan hasil kerja sendiri tanpa menyontek' },
+            { id: 7, type: 'pg', text: 'Panjang harakat bacaan untuk semua jenis Mad Lazim (baik Mukhaffaf maupun Mutsaqqal, Kilmi maupun Harfi) saat dibaca wasal maupun wakaf adalah...', options: ['2 harakat', '4 harakat', '6 harakat', '1 harakat'], answer: '6 harakat' },
+            { id: 8, type: 'pg', text: 'Apa dampak positif utama bagi seorang pelajar yang senantiasa menjaga integritas dan kejujuran dalam pergaulan sehari-hari?', options: ['Mendapatkan pujian berlebihan dari semua orang', 'Dipercaya oleh orang lain dan batin menjadi tenang', 'Menjadi pusat perhatian di kelas', 'Selalu mendapat nilai tertinggi tanpa belajar'], answer: 'Dipercaya oleh orang lain dan batin menjadi tenang' },
+            { id: 9, type: 'pg', text: 'Mad Lazim Mutsaqqal Kilmi terjadi apabila ada Mad Thabi`i yang bertemu dengan huruf berbaris tasydid di dalam...', options: ['Dua kata yang terpisah', 'Satu kalimat penuh', 'Satu kata yang sama', 'Akhir surat'], answer: 'Satu kata yang sama' },
+            { id: 10, type: 'pg', text: 'Contoh bacaan Mad Lazim Mutsaqqal Kilmi yang sering dijumpai dalam surah Al-Fatihah adalah pada lafaz...', options: ['Al-hamdu lillahi rabbil `alamin', 'Ar-rahmanir rahim', 'Maliki yaumid din', 'Waladh-dhaallin'], answer: 'Waladh-dhaallin' },
+            { id: 11, type: 'pg', text: 'Seseorang yang memiliki integritas tinggi dalam pandangan Islam akan selalu menyelaraskan antara...', options: ['Ucapan, keyakinan hati, dan perbuatan nyata', 'Keinginan pribadi dan harta kekayaan', 'Teori pelajaran dan hiburan', 'Waktu istirahat dan jam belajar'], answer: 'Ucapan, keyakinan hati, dan perbuatan nyata' },
+            { id: 12, type: 'pg', text: 'Mad Lazim Harfi Mukhaffaf terdapat pada permulaan surah (fawatihus suwar) yang berupa huruf tunggal pembuka ayat, seperti huruf Shad (ص) atau Qaf (ق) pada awal surat. Panjang bacaannya adalah...', options: ['2 harakat', '4 harakat', '6 harakat', '8 harakat'], answer: '6 harakat' },
+            { id: 13, type: 'pg', text: 'Dalam sebuah koperasi sekolah, seorang pengurus mendapati selisih uang kas dan ia segera melaporkan serta menutup kekurangannya dengan uang pribadinya karena takut kepada Allah. Perilaku ini mencerminkan...', options: ['Riya dan sum\'ah', 'Kejujuran, amanah, dan integritas tinggi', 'Kecerobohan finansial', 'Sikap pamer kebaikan'], answer: 'Kejujuran, amanah, dan integritas tinggi' },
+            { id: 14, type: 'pg', text: 'Mad Lazim Mutsaqqal Harfi terjadi pada huruf-huruf fawatihus suwar (pembuka surat) yang dieja, di mana huruf tengahnya berupa huruf mad yang bertemu dengan huruf sukun, kemudian dilebur (idgham) kepada huruf berikutnya sehingga ditasydidkan. Contohnya terdapat pada awal surah...', options: ['Al-Baqarah (الم)', 'Yasin (يس)', 'Thaha (طه)', 'Shaad (ص)'], answer: 'Al-Baqarah (الم)' },
+            { id: 15, type: 'pg', text: 'Hadis Nabi Muhammad SAW menegaskan bahwa kejujuran akan membawa kepada kebaikan (al-birr), dan kebaikan akan mengantarkan ke...', options: ['Kekayaan dunia', 'Surga Allah SWT', 'Kedudukan tinggi', 'Popularitas sosial'], answer: 'Surga Allah SWT' },
+
+            // Pilihan Ganda Kompleks (15 Soal)
+            { id: 16, type: 'pg_kompleks', text: 'Manakah pernyataan di bawah ini yang merupakan ciri-ciri seseorang yang memiliki sikap integritas tinggi berdasarkan nilai-nilai Islam? (Pilih semua yang benar)', options: ['Konsisten antara perkataan dan perbuatan meskipun dalam situasi sulit', 'Bertanggung jawab penuh atas segala kesalahan yang diperbuat', 'Berbuat jujur hanya ketika diawasi oleh guru atau orang tua', 'Menolak segala bentuk kecurangan seperti plagiasi atau korupsi kecil'], answers: ['Konsisten antara perkataan dan perbuatan meskipun dalam situasi sulit', 'Bertanggung jawab penuh atas segala kesalahan yang diperbuat', 'Menolak segala bentuk kecurangan seperti plagiasi atau korupsi kecil'] },
+            { id: 17, type: 'pg_kompleks', text: 'Pilih pernyataan yang BENAR mengenai hukum bacaan Mad Lazim Mukhaffaf Kilmi:', options: ['Hanya terdapat pada satu kata di dalam Al-Qur\'an yaitu surat Yunus ayat 51 dan 91', 'Dibaca sepanjang 6 harakat', 'Bertemunya mad thabi`i dengan huruf bertasydid', 'Huruf sesudah mad berbaris sukun asli tanpa tasydid dalam satu kata'], answers: ['Hanya terdapat pada satu kata di dalam Al-Qur\'an yaitu surat Yunus ayat 51 dan 91', 'Dibaca sepanjang 6 harakat', 'Huruf sesudah mad berbaris sukun asli tanpa tasydid dalam satu kata'] },
+            { id: 18, type: 'pg_kompleks', text: 'Apa saja hikmah atau buah dari sifat jujur dalam kehidupan sehari-hari? (Pilih semua yang benar)', options: ['Hati menjadi tenang dan tidak diliputi rasa bersalah', 'Mendapatkan kepercayaan penuh dari lingkungan sekitar', 'Mudah dimanfaatkan oleh orang lain yang tidak jujur', 'Terhindar dari sifat munafik yang dibenci Allah'], answers: ['Hati menjadi tenang dan tidak diliputi rasa bersalah', 'Mendapatkan kepercayaan penuh dari lingkungan sekitar', 'Terhindar dari sifat munafik yang dibenci Allah'] },
+            { id: 19, type: 'pg_kompleks', text: 'Manakah di antara contoh berikut yang tergolong ke dalam Mad Lazim Mutsaqqal Kilmi? (Pilih semua yang benar)', options: ['وَلَا الضَّالِّينَ', 'دَابَّةٍ', 'الحَاقَّةُ', 'قُلْ أُوحِيَ'], answers: ['وَلَا الضَّالِّينَ', 'دَابَّةٍ', 'الحَاقَّةُ'] },
+            { id: 20, type: 'pg_kompleks', text: 'Bentuk-bentuk implementasi integritas bagi seorang siswa di lingkungan madrasah meliputi...', options: ['Tidak menyontek saat ujian asesmen', 'Datang dan pulang sekolah tepat waktu sesuai aturan', 'Mengakui jika merusak fasilitas sekolah secara tidak sengaja', 'Menyontek tugas teman agar nilainya sama tinggi'], answers: ['Tidak menyontek saat ujian asesmen', 'Datang dan pulang sekolah tepat waktu sesuai aturan', 'Mengakui jika merusak fasilitas sekolah secara tidak sengaja'] },
+            { id: 21, type: 'pg_kompleks', text: 'Manakah pernyataan yang tepat mengenai perbedaan antara Mutsaqqal dan Mukhaffaf dalam hukum Mad Lazim?', options: ['Mutsaqqal artinya diberatkan karena ada tasydid', 'Mukhaffaf artinya diringankan karena ada sukun tanpa tasydid', 'Keduanya memiliki panjang bacaan yang berbeda (Mutsaqqal 6 harakat, Mukhaffaf 2 harakat)', 'Keduanya sama-sama wajib dibaca panjang 6 harakat'], answers: ['Mutsaqqal artinya diberatkan karena ada tasydid', 'Mukhaffaf artinya diringankan karena ada sukun tanpa tasydid', 'Keduanya sama-sama wajib dibaca panjang 6 harakat'] },
+            { id: 22, type: 'pg_kompleks', text: 'Di dalam Al-Qur\'an, huruf-huruf pembuka surah (fawatihus suwar) yang termasuk dalam kategori Mad Lazim Harfi (baik Mutsaqqal maupun Mukhaffaf) dieja berdasarkan jumlah hurufnya. Huruf apa saja yang dikategorikan sebagai Mad Lazim Harfi Muksaqqal/Mutsaqqal?', options: ['نَقَصَ عَسَلُكُمْ (Nun, Qaf, Shad, Ain, Sin, Lam, Mim, Kaf)', 'Huruf alif yang tidak memiliki bacaan mad', 'Huruf ha (ه) dan ya (ي) pada thaha', 'Huruf yang dieja tiga huruf di tengahnya ada huruf mad'], answers: ['نَقَصَ عَسَلُكُمْ (Nun, Qaf, Shad, Ain, Sin, Lam, Mim, Kaf)', 'Huruf yang dieja tiga huruf di tengahnya ada huruf mad'] },
+            { id: 23, type: 'pg_kompleks', text: 'Perilaku yang menunjukkan cerminan ketidakjujuran dalam masyarakat yang harus dihindari oleh seorang Muslim adalah...', options: ['Melakukan korupsi waktu saat bekerja atau belajar', 'Berbohong demi menutupi kesalahan orang lain yang zalim', 'Menyampaikan berita sesuai fakta yang terverifikasi', 'Melakukan kecurangan dalam penimbangan barang dagangan'], answers: ['Melakukan korupsi waktu saat bekerja atau belajar', 'Berbohong demi menutupi kesalahan orang lain yang zalim', 'Melakukan kecurangan dalam penimbangan barang dagangan'] },
+            { id: 24, type: 'pg_kompleks', text: 'Manakah kalimat di bawah ini yang benar mengenai hubungan antara kejujuran dan keberkahan hidup?', options: ['Kejujuran mendatangkan ketenangan batin dan keberkahan rezeki', 'Kecurangan dapat mendatangkan harta melimpah yang penuh berkah berkepanjangan', 'Orang jujur senantiasa dilindungi Allah dalam setiap urusannya', 'Kejujuran sering kali mempersulit urusan hidup manusia'], answers: ['Kejujuran mendatangkan ketenangan batin dan keberkahan rezeki', 'Orang jujur senantiasa dilindungi Allah dalam setiap urusannya'] },
+            { id: 25, type: 'pg_kompleks', text: 'Manakah bacaan berikut yang termasuk contoh Mad Lazim Harfi Mukhaffaf?', options: ['حَم (Ha Mim)', 'طس (Tha Sin)', 'يس (Ya Sin)', 'الر (Alif Lam Ra) - pada huruf ra'], answers: ['حَم (Ha Mim)', 'طس (Tha Sin)', 'الر (Alif Lam Ra) - pada huruf ra'] },
+            { id: 26, type: 'pg_kompleks', text: 'Pilihlah sikap yang mencerminkan integritas seorang pemimpin di madrasah:', options: ['Berlaku adil kepada seluruh siswa tanpa diskriminasi', 'Menepati janji program kerja yang telah disosialisasikan', 'Menutupi kesalahan teman sejawat demi nama baik instansi', 'Transparan dalam pengelolaan kegiatan keuangan sekolah'], answers: ['Berlaku adil kepada seluruh siswa tanpa diskriminasi', 'Menepati janji program kerja yang telah disosialisasikan', 'Transparan dalam pengelolaan kegiatan keuangan sekolah'] },
+            { id: 27, type: 'pg_kompleks', text: 'Apa saja arti penting mempelajari ilmu tajwid khususnya hukum Mad Lazim bagi siswa madrasah?', options: ['Agar dapat membaca ayat suci Al-Qur\'an dengan fasih dan benar sesuai kaidah', 'Menjaga kemurnian bacaan Al-Qur\'an dari kesalahan fatal (lahn)', 'Memenuhi syarat sah shalat saat membaca surah pendek', 'Agar dapat memenangkan lomba cerdas cermat saja'], answers: ['Agar dapat membaca ayat suci Al-Qur\'an dengan fasih dan benar sesuai kaidah', 'Menjaga kemurnian bacaan Al-Qur\'an dari kesalahan fatal (lahn)', 'Memenuhi syarat sah shalat saat membaca surah pendek'] },
+            { id: 28, type: 'pg_kompleks', text: 'Sifat jujur dibagi menjadi beberapa macam dalam pandangan akhlak Islam, di antaranya adalah...', options: ['Jujur dalam niat dan kehendak (sidq al-qalb)', 'Jujur dalam perkataan (sidq al-lisan)', 'Jujur dalam perbuatan dan janji (sidq al-\'amal)', 'Jujur hanya ketika menguntungkan diri sendiri'], answers: ['Jujur dalam niat dan kehendak (sidq al-qalb)', 'Jujur dalam perkataan (sidq al-lisan)', 'Jujur dalam perbuatan dan janji (sidq al-\'amal)'] },
+            { id: 29, type: 'pg_kompleks', text: 'Manakah di bawah ini yang merupakan konsekuensi logis dari melanggar nilai-nilai kejujuran dan integritas?', options: ['Hilangnya kepercayaan dari orang lain', 'Timbulnya rasa cemas dan gelisah dalam diri', 'Mendapatkan kemudahan dalam segala urusan', 'Dibenci oleh masyarakat dan mendapat murka Allah'], answers: ['Hilangnya kepercayaan dari orang lain', 'Timbulnya rasa cemas dan gelisah dalam diri', 'Dibenci oleh masyarakat dan mendapat murka Allah'] },
+            { id: 30, type: 'pg_kompleks', text: 'Unsur-unsur yang harus terpenuhi agar suatu bacaan dikategorikan sebagai Mad Lazim Mutsaqqal Harfi adalah...', options: ['Merupakan huruf pembuka surah (fawatihus suwar)', 'Dieja menjadi tiga huruf', 'Tengahnya berupa huruf mad thabi`i', 'Huruf ketiga bertasydid karena diidghamkan ke huruf setelahnya'], answers: ['Merupakan huruf pembuka surah (fawatihus suwar)', 'Dieja menjadi tiga huruf', 'Tengahnya berupa huruf mad thabi`i', 'Huruf ketiga bertasydid karena diidghamkan ke huruf setelahnya'] },
+
+            // Menjodohkan (10 Soal)
+            { 
+                id: 31, type: 'menjodohkan', 
+                text: 'Jodohkan istilah hukum bacaan Mad Lazim berikut dengan pengertian dasarnya!',
+                pairs: [
+                    { left: 'Mad Lazim Mukhaffaf Kilmi', right: 'Mad thabi`i bertemu sukun asli dalam satu kata' },
+                    { left: 'Mad Lazim Mutsaqqal Kilmi', right: 'Mad thabi`i bertemu tasydid dalam satu kata' },
+                    { left: 'Mad Lazim Mukhaffaf Harfi', right: 'Huruf fawatihus suwar dieja 3 huruf tanpa idgham' },
+                    { left: 'Mad Lazim Mutsaqqal Harfi', right: 'Huruf fawatihus suwar dieja 3 huruf dengan idgham tasydid' }
+                ]
+            },
+            { 
+                id: 32, type: 'menjodohkan', 
+                text: 'Jodohkan contoh ayat atau lafaz dengan hukum bacaan Mad Lazim yang sesuai!',
+                pairs: [
+                    { left: 'آلآنَ (Al-ana)', right: 'Mad Lazim Mukhaffaf Kilmi' },
+                    { left: 'الحَاقَّةُ (Al-haqqah)', right: 'Mad Lazim Mutsaqqal Kilmi' },
+                    { left: 'الم (Alif Lam Mim)', right: 'Mad Lazim Mutsaqqal Harfi' },
+                    { left: 'يس (Ya Sin)', right: 'Mad Lazim Mukhaffaf Harfi' }
+                ]
+            },
+            { 
+                id: 33, type: 'menjodohkan', 
+                text: 'Jodohkan bentuk perilaku jujur dengan implementasi dalam kehidupan sehari-hari!',
+                pairs: [
+                    { left: 'Sidq al-lisan', right: 'Berbicara sesuai dengan fakta dan kenyataan' },
+                    { left: 'Sidq al-qalb', right: 'Kesucian niat beramal semata-mata karena Allah' },
+                    { left: 'Sidq al-\'amal', right: 'Kesesuaian amal perbuatan dengan syariat tanpa kepalsuan' },
+                    { left: 'Sidq al-wa\'d', right: 'Selalu menepati janji yang telah diucapkan' }
+                ]
+            },
+            { 
+                id: 34, type: 'menjodohkan', 
+                text: 'Jodohkan panjang bacaan (harakat) dengan ketentuan hukum tajwidnya!',
+                pairs: [
+                    { left: 'Semua jenis Mad Lazim', right: '6 Harakat (Wajib Panjang)' },
+                    { left: 'Mad Thabi`i biasa', right: '2 Harakat' },
+                    { left: 'Mad Jaiz Munfasil (umum)', right: '4 atau 5 Harakat' },
+                    { left: 'Mad `Arid Lissukun', right: '2, 4, atau 6 Harakat' }
+                ]
+            },
+            { 
+                id: 35, type: 'menjodohkan', 
+                text: 'Jodohkan dampak positif integritas dengan manfaat sosialnya!',
+                pairs: [
+                    { left: 'Menjaga amanah', right: 'Dipercaya relasi dan pimpinan' },
+                    { left: 'Bersikap jujur saat ujian', right: 'Membangun mental percaya diri sejati' },
+                    { left: 'Terbuka dalam laporan', right: 'Mencegah kecurigaan dan fitnah' },
+                    { left: 'Menepati janji dagang', right: 'Mendatangkan keberkahan rezeki' }
+                ]
+            },
+            { 
+                id: 36, type: 'menjodohkan', 
+                text: 'Jodohkan istilah bahasa Arab terkait akhlak tercela lawan dari kejujuran!',
+                pairs: [
+                    { left: 'Kadzib', right: 'Berdusta atau berkata tidak sesuai fakta' },
+                    { left: 'Khianat', right: 'Mengingkari kepercayaan yang diberikan' },
+                    { left: 'Nifaq', right: 'Berdusta dalam keyakinan (munafik)' },
+                    { left: 'Ghisy', right: 'Curang dalam timbangan atau transaksi' }
+                ]
+            },
+            { 
+                id: 37, type: 'menjodohkan', 
+                text: 'Jodohkan nama surat pembuka fawatihus suwar dengan klasifikasi hurufnya!',
+                pairs: [
+                    { left: 'ص (Shad)', right: 'Mad Lazim Harfi Mukhaffaf' },
+                    { left: 'طسم (Tha Sin Mim)', right: 'Mad Lazim Harfi Mutsaqqal' },
+                    { left: 'طه (Tha Ha)', right: 'Mad Thabi`i Harfi (2 harakat)' },
+                    { left: 'الر (Alif Lam Ra)', right: 'Campuran Mutsaqqal dan Thabi`i' }
+                ]
+            },
+            { 
+                id: 38, type: 'menjodohkan', 
+                text: 'Jodohkan kategori nilai integritas personal dengan contoh sikapnya!',
+                pairs: [
+                    { left: 'Integritas akademik', right: 'Tidak mencontek dan jujur dalam riset' },
+                    { left: 'Integritas finansial', right: 'Mengembalikan sisa uang belanja secara utuh' },
+                    { left: 'Integritas sosial', right: 'Konsisten membela kebenaran di masyarakat' },
+                    { left: 'Integritas profesional', right: 'Bekerja sungguh-sungguh sesuai jam dinas' }
+                ]
+            },
+            { 
+                id: 39, type: 'menjodohkan', 
+                text: 'Jodohkan hadis atau dalil akhlak dengan keutamaannya!',
+                pairs: [
+                    { left: 'Al-sidqu yanjai (Kejujuran menyelamatkan)', right: 'Membawa pelakunya pada keselamatan dunia akhirat' },
+                    { left: 'Al-kazibu yuhliki (Kebohongan membinasakan)', right: 'Menyeret pada kehancuran moral dan sosial' },
+                    { left: 'Ayatul munafiqi salasun...', right: 'Tanda munafik salah satunya jika berbicara berdusta' },
+                    { left: 'Innamal a\'binniyat...', right: 'Segala amal tergantung pada niat dan kejujuran hati' }
+                ]
+            },
+            { 
+                id: 40, type: 'menjodohkan', 
+                text: 'Jodohkan karakteristik harakat huruf Mad Lazim dengan kondisi bacaannya!',
+                pairs: [
+                    { left: 'Sukun asli murni', right: 'Mukhaffaf (tanpa tasydid)' },
+                    { left: 'Tasydid hasil idgham', right: 'Mutsaqqal (diberatkan)' },
+                    { left: 'Huruf fawatihus suwar 3 huruf', right: 'Mad Lazim Harfi' },
+                    { left: 'Kalimat utuh dalam Al-Qur\'an', right: 'Mad Lazim Kilmi' }
+                ]
+            }
+        ];
+
+        const { useState, useEffect, useRef, useCallback } = React;
+        const DEFAULT_PASS_ADMIN = "admin123";
+
+        function App() {
+            const [view, setView] = useState('login');
+            const [user, setUser] = useState(null);
+            const [questions, setQuestions] = useState(INITIAL_QUESTIONS);
+            const [examData, setExamData] = useState(null);
+            const [dbInitialized, setDbInitialized] = useState(false);
+            const [appSettings, setAppSettings] = useState({ adminPassword: DEFAULT_PASS_ADMIN, logo: '' });
+
+            useEffect(() => {
+                const storedSettings = localStorage.getItem('alquranExamSettings');
+                if(storedSettings) {
+                    setAppSettings(JSON.parse(storedSettings));
+                }
+                const storedQuestions = localStorage.getItem('alquranExamQuestions');
+                if(storedQuestions) {
+                    setQuestions(JSON.parse(storedQuestions));
+                }
+                setDbInitialized(true);
+            }, []);
+
+            const handleLogin = (userData) => {
+                setUser(userData);
+                if (userData.role === 'admin') {
+                    setView('admin_dashboard');
+                } else {
+                    setView('student_dashboard');
+                }
+            };
+
+            const handleLogout = () => {
+                setUser(null);
+                setView('login');
+                setExamData(null);
+            };
+
+            if (!dbInitialized) return <div className="flex h-screen items-center justify-center font-semibold text-emerald-800">Memuat Aplikasi Asesmen...</div>;
+
+            return (
+                <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+                    {}
+                    <header className="bg-emerald-800 text-white p-4 shadow-md no-print">
+                        <div className="max-w-6xl mx-auto flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                {appSettings.logo ? 
+                                    <img src={appSettings.logo} alt="Logo" className="h-10 w-10 object-contain rounded-full bg-white p-1"/> : 
+                                    <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center text-emerald-800 font-bold">NU</div>
+                                }
+                                <div>
+                                    <h1 className="text-lg sm:text-xl font-bold">Penilaian Tengah Semester (PTS)</h1>
+                                    <p className="text-xs sm:text-sm text-emerald-100">MTs. Mu'allimin NU Kota Malang | Al-Qur'an Hadist Kls IX</p>
+                                </div>
+                            </div>
+                            {user && (
+                                <div className="flex items-center gap-4">
+                                    <div className="text-right hidden sm:block">
+                                        <p className="font-semibold">{user.name}</p>
+                                        <p className="text-xs text-emerald-200 capitalize">{user.role === 'student' ? `Kelas ${user.kelas} | No. ${user.presensi}` : 'Administrator'}</p>
+                                    </div>
+                                    <button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-sm transition font-medium flex items-center gap-2">
+                                        <i className="fas fa-sign-out-alt"></i> Keluar
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </header>
+
+                    <main className="max-w-6xl mx-auto p-4 sm:p-6 pb-20">
+                        {view === 'login' && <Login onLogin={handleLogin} appSettings={appSettings} />}
+                        {view === 'student_dashboard' && <StudentDashboard user={user} setView={setView} setExamData={setExamData} />}
+                        {view === 'exam' && <ExamInterface user={user} questions={questions} setView={setView} setExamData={setExamData} examData={examData} isPreview={user.role==='admin'}/>}
+                        {view === 'result' && <ResultView examData={examData} user={user} setView={setView} />}
+                        {view === 'admin_dashboard' && <AdminDashboard setView={setView} user={user} setExamData={setExamData} questions={questions} appSettings={appSettings} setAppSettings={setAppSettings} />}
+                        {view === 'admin_edit' && <AdminEditQuestions questions={questions} setQuestions={setQuestions} setView={setView} />}
+                    </main>
+                    
+                    <footer className="text-center text-sm text-slate-500 py-6 no-print">
+                        Disusun oleh: Damat, S. Ag., S. Pd. &copy; 2026
+                    </footer>
+                </div>
+            );
+        }
+
+        function Login({ onLogin, appSettings }) {
+            const [mode, setMode] = useState('student');
+            const [username, setUsername] = useState('');
+            const [kelas, setKelas] = useState('IX A');
+            const [presensi, setPresensi] = useState('');
+            const [adminUser, setAdminUser] = useState('admin');
+            const [adminPass, setAdminPass] = useState('');
+            const [error, setError] = useState('');
+
+            const handleStudentSubmit = (e) => {
+                e.preventDefault();
+                if (!username.trim() || !presensi.trim()) {
+                    setError("Nama lengkap dan nomor presensi wajib diisi.");
+                    return;
+                }
+                
+                const usersData = JSON.parse(localStorage.getItem('alquranExamUsers') || '{}');
+                const userKey = `${kelas}_${presensi}_${username.trim().toLowerCase()}`;
+                
+                let userData = usersData[userKey];
+                if (!userData) {
+                    userData = { role: 'student', name: username, kelas, presensi, attempts: 0, scores: [] };
+                    usersData[userKey] = userData;
+                    localStorage.setItem('alquranExamUsers', JSON.stringify(usersData));
+                }
+
+                if (userData.attempts >= 3) {
+                    setError("Anda telah mencapai batas maksimal 3 kali pengerjaan.");
+                    return;
+                }
+
+                setError('');
+                onLogin(userData);
+            };
+
+            const handleAdminSubmit = (e) => {
+                e.preventDefault();
+                if (adminUser === 'admin' && adminPass === appSettings.adminPassword) {
+                    onLogin({ role: 'admin', name: 'Damat, S. Ag., S. Pd.' });
+                } else {
+                    setError("Username atau password admin salah.");
+                }
+            };
+
+            return (
+                <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-10 border border-slate-200">
+                    <div className="flex border-b">
+                        <button className={`flex-1 py-3 text-center font-semibold transition ${mode === 'student' ? 'bg-emerald-50 text-emerald-800 border-b-2 border-emerald-600' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setMode('student')}>Siswa</button>
+                        <button className={`flex-1 py-3 text-center font-semibold transition ${mode === 'admin' ? 'bg-emerald-50 text-emerald-800 border-b-2 border-emerald-600' : 'text-slate-500 hover:bg-slate-50'}`} onClick={() => setMode('admin')}>Guru / Admin</button>
+                    </div>
+
+                    <div className="p-6">
+                        {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm border border-red-200"><i className="fas fa-exclamation-circle mr-2"></i>{error}</div>}
+                        
+                        {mode === 'student' ? (
+                            <form onSubmit={handleStudentSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap Siswa</label>
+                                    <input type="text" className="w-full p-2.5 border rounded focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Masukkan nama lengkap..." value={username} onChange={e => setUsername(e.target.value)} required />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Kelas</label>
+                                        <select className="w-full p-2.5 border rounded focus:ring-2 focus:ring-emerald-500 outline-none" value={kelas} onChange={e => setKelas(e.target.value)}>
+                                            <option value="IX A">IX A</option>
+                                            <option value="IX B">IX B</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">No. Presensi (Sandi)</label>
+                                        <input type="number" className="w-full p-2.5 border rounded focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Cth: 12" value={presensi} onChange={e => setPresensi(e.target.value)} required />
+                                    </div>
+                                </div>
+                                <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-lg transition mt-4 shadow">
+                                    Masuk Ujian Siswa
+                                </button>
+                                <p className="text-xs text-center text-slate-500 mt-4">Ketentuan: Kesempatan mengerjakan maksimal 3 kali.</p>
+                            </form>
+                        ) : (
+                            <form onSubmit={handleAdminSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Username Admin</label>
+                                    <input type="text" className="w-full p-2.5 border rounded focus:ring-2 focus:ring-emerald-500 outline-none" value={adminUser} onChange={e => setAdminUser(e.target.value)} required />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                                    <input type="password" className="w-full p-2.5 border rounded focus:ring-2 focus:ring-emerald-500 outline-none" value={adminPass} onChange={e => setAdminPass(e.target.value)} required />
+                                </div>
+                                <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg transition mt-4 shadow">
+                                    Masuk Panel Guru
+                                </button>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function StudentDashboard({ user, setView, setExamData }) {
+            const startExam = () => {
+                setExamData({
+                    answers: {},
+                    startTime: Date.now(),
+                    timeLimit: 90 * 60, // 90 minutes
+                    isFinished: false
+                });
+                setView('exam');
+            };
+
+            const attemptsLeft = 3 - user.attempts;
+
+            return (
+                <div className="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto mt-6 border border-slate-200">
+                    <h2 className="text-2xl font-bold text-slate-800 mb-2">Ahlan wa Sahlan, {user.name}</h2>
+                    <p className="text-slate-600 mb-6">Silakan baca instruksi asesmen di bawah ini sebelum memulai.</p>
+                    
+                    <div className="bg-emerald-50 border-l-4 border-emerald-600 p-4 mb-6 rounded-r">
+                        <h3 className="font-semibold text-emerald-900 mb-2">Informasi Asesmen Sumatif:</h3>
+                        <ul className="list-disc ml-5 text-emerald-950 text-sm space-y-1">
+                            <li>Mata Pelajaran: <strong>Al-Qur'an Hadist (Kelas IX)</strong></li>
+                            <li>Materi: <strong>Mad Lazim (Mukhaffaf, Mutsaqqal Kilmi & Harfi) serta Kejujuran & Integritas</strong></li>
+                            <li>Alokasi Waktu: <strong>90 Menit</strong></li>
+                            <li>KKM: <strong>80</strong></li>
+                            <li>Jumlah Soal: <strong>40 Soal</strong> (15 PG, 15 PG Kompleks, 10 Menjodohkan)</li>
+                        </ul>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-slate-100 rounded-lg mb-6">
+                        <div>
+                            <p className="text-sm text-slate-500 font-medium">Sisa Kesempatan</p>
+                            <p className="text-xl font-bold text-slate-800">{attemptsLeft} / 3 kali</p>
+                        </div>
+                        {user.scores && user.scores.length > 0 && (
+                            <div className="text-right">
+                                <p className="text-sm text-slate-500 font-medium">Nilai Tertinggi Anda</p>
+                                <p className="text-2xl font-bold text-emerald-700">{Math.max(...user.scores.map(s => s.score))}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {attemptsLeft > 0 ? (
+                        <button onClick={startExam} className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 px-4 rounded-lg shadow-md transition text-lg flex items-center justify-center gap-2">
+                            <i className="fas fa-play-circle"></i> Mulai Kerjakan Soal
+                        </button>
+                    ) : (
+                        <div className="bg-red-50 text-red-700 p-4 rounded-lg text-center font-medium border border-red-200">
+                            Anda telah menggunakan batas maksimal 3 kali pengerjaan asesmen.
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function useTimer(initialSeconds, onComplete) {
+            const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
+
+            useEffect(() => {
+                if (secondsLeft <= 0) {
+                    onComplete();
+                    return;
+                }
+                const interval = setInterval(() => {
+                    setSecondsLeft(prev => prev - 1);
+                }, 1000);
+                return () => clearInterval(interval);
+            }, [secondsLeft, onComplete]);
+
+            const formatTime = () => {
+                const h = Math.floor(secondsLeft / 3600);
+                const m = Math.floor((secondsLeft % 3600) / 60);
+                const s = secondsLeft % 60;
+                return `${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            };
+
+            return { secondsLeft, formatTime };
+        }
+
+        function ExamInterface({ user, questions, setView, setExamData, examData, isPreview = false }) {
+            const [currentQIndex, setCurrentQIndex] = useState(0);
+            const [localAnswers, setLocalAnswers] = useState(examData?.answers || {});
+            const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
+
+            const handleTimeUp = useCallback(() => {
+                if(!examData.isFinished) {
+                   submitExam(true);
+                }
+            }, [localAnswers]);
+
+            const { secondsLeft, formatTime } = useTimer(examData?.timeLimit || 5400, handleTimeUp);
+
+            const handleAnswerChange = (qId, value, type) => {
+                const newAnswers = { ...localAnswers };
+                
+                if (type === 'pg') {
+                    newAnswers[qId] = value;
+                } else if (type === 'pg_kompleks') {
+                    const currentArr = newAnswers[qId] || [];
+                    if (currentArr.includes(value)) {
+                        newAnswers[qId] = currentArr.filter(v => v !== value);
+                    } else {
+                        newAnswers[qId] = [...currentArr, value];
+                    }
+                } else if (type === 'menjodohkan') {
+                    const currentMatches = newAnswers[qId] || [];
+                    const filteredMatches = currentMatches.filter(m => m.left !== value.left);
+                    newAnswers[qId] = [...filteredMatches, value];
+                }
+                
+                setLocalAnswers(newAnswers);
+                setExamData({ ...examData, answers: newAnswers });
+            };
+
+            const submitExam = (autoSubmit = false) => {
+                let score = 0;
+                let correctCount = 0;
+                const maxScore = 100;
+                const totalQuestions = questions.length;
+                const weightPerQuestion = maxScore / totalQuestions; // 100 / 40 = 2.5
+
+                questions.forEach(q => {
+                    const ans = localAnswers[q.id];
+                    if (!ans) return;
+
+                    if (q.type === 'pg' && ans === q.answer) {
+                        correctCount++;
+                        score += weightPerQuestion;
+                    } else if (q.type === 'pg_kompleks') {
+                        const correctAnswers = q.answers;
+                        if (ans.length === correctAnswers.length && ans.every(a => correctAnswers.includes(a))) {
+                            correctCount++;
+                            score += weightPerQuestion;
+                        } else if (ans.length > 0) {
+                            const correctMatches = ans.filter(a => correctAnswers.includes(a)).length;
+                            const incorrectMatches = ans.length - correctMatches;
+                            if(incorrectMatches === 0) {
+                                score += (weightPerQuestion * (correctMatches / correctAnswers.length));
+                            }
+                        }
+                    } else if (q.type === 'menjodohkan') {
+                        let matchCorrect = 0;
+                        const totalPairs = q.pairs.length;
+                        ans.forEach(match => {
+                            const correctPair = q.pairs.find(p => p.left === match.left);
+                            if (correctPair && correctPair.right === match.right) {
+                                matchCorrect++;
+                            }
+                        });
+                        score += (weightPerQuestion * (matchCorrect / totalPairs));
+                        if(matchCorrect === totalPairs) correctCount++;
+                    }
+                });
+
+                const finalScore = Math.round(score);
+
+                if (!isPreview) {
+                    const usersData = JSON.parse(localStorage.getItem('alquranExamUsers') || '{}');
+                    const userKey = `${user.kelas}_${user.presensi}_${user.name.trim().toLowerCase()}`;
+                    if (usersData[userKey]) {
+                        usersData[userKey].attempts += 1;
+                        usersData[userKey].scores.push({
+                            score: finalScore,
+                            date: new Date().toISOString(),
+                            answers: localAnswers
+                        });
+                        localStorage.setItem('alquranExamUsers', JSON.stringify(usersData));
+                    }
+                }
+
+                setExamData({
+                    ...examData,
+                    answers: localAnswers,
+                    score: finalScore,
+                    isFinished: true,
+                    timeSpent: (90 * 60) - secondsLeft
+                });
+                setView('result');
+            };
+
+            const q = questions[currentQIndex];
+
+            const navButtons = questions.map((q, idx) => {
+                let status = 'unanswered';
+                const ans = localAnswers[q.id];
+                if (ans) {
+                    if (q.type === 'pg') status = 'answered';
+                    else if (q.type === 'pg_kompleks' && ans.length > 0) status = 'answered';
+                    else if (q.type === 'menjodohkan' && ans.length === q.pairs.length) status = 'answered';
+                    else if (q.type === 'menjodohkan' && ans.length > 0) status = 'partial';
+                }
+                return (
+                    <button key={q.id} onClick={() => setCurrentQIndex(idx)}
+                        className={`w-9 h-9 rounded text-xs font-semibold border flex items-center justify-center transition
+                            ${currentQIndex === idx ? 'ring-2 ring-emerald-600 ring-offset-1' : ''}
+                            ${status === 'answered' ? 'bg-emerald-700 text-white border-emerald-800' : 
+                              status === 'partial' ? 'bg-amber-400 text-slate-900 border-amber-500' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}`}
+                    >
+                        {idx + 1}
+                    </button>
+                );
+            });
+
+            return (
+                <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex-1">
+                        <div className="bg-white rounded-xl shadow mb-4 p-4 flex justify-between items-center sticky top-0 z-20 border border-slate-200">
+                            <div>
+                                <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                                    Soal {currentQIndex + 1} dari {questions.length}
+                                </span>
+                                {isPreview && <span className="ml-2 bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs font-bold">MODE UJI COBA GURU</span>}
+                            </div>
+                            <div className={`font-mono text-base sm:text-lg font-bold flex items-center gap-2 px-4 py-1.5 rounded-lg ${secondsLeft < 300 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-slate-100 text-slate-800'}`}>
+                                <i className="far fa-clock"></i> {formatTime()}
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow p-6 min-h-[400px] border border-slate-200">
+                            <div className="mb-6">
+                                <h3 className="text-base sm:text-lg text-slate-900 font-medium leading-relaxed mb-3">{q.text}</h3>
+                                {q.type === 'pg_kompleks' && <p className="text-xs sm:text-sm text-blue-700 bg-blue-50 p-2.5 rounded border border-blue-200 inline-block"><i className="fas fa-info-circle mr-1"></i> Pilihan ganda kompleks: Pilih semua jawaban yang benar (bisa lebih dari satu).</p>}
+                                {q.type === 'menjodohkan' && <p className="text-xs sm:text-sm text-amber-700 bg-amber-50 p-2.5 rounded border border-amber-200 inline-block"><i className="fas fa-info-circle mr-1"></i> Menjodohkan: Klik item di sebelah kiri lalu klik pasangannya di sebelah kanan.</p>}
+                            </div>
+
+                            <div className="space-y-3">
+                                {q.type === 'pg' && q.options.map((opt, i) => (
+                                    <label key={i} className={`flex items-start p-3.5 border rounded-lg cursor-pointer transition ${localAnswers[q.id] === opt ? 'border-emerald-600 bg-emerald-50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                                        <input type="radio" name={`q_${q.id}`} value={opt} checked={localAnswers[q.id] === opt} onChange={() => handleAnswerChange(q.id, opt, 'pg')} className="mt-1 w-4 h-4 text-emerald-700 focus:ring-emerald-600 border-gray-300" />
+                                        <span className="ml-3 text-sm sm:text-base text-slate-800">{opt}</span>
+                                    </label>
+                                ))}
+
+                                {q.type === 'pg_kompleks' && q.options.map((opt, i) => (
+                                    <label key={i} className={`flex items-start p-3.5 border rounded-lg cursor-pointer transition ${(localAnswers[q.id] || []).includes(opt) ? 'border-blue-600 bg-blue-50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                                        <input type="checkbox" checked={(localAnswers[q.id] || []).includes(opt)} onChange={() => handleAnswerChange(q.id, opt, 'pg_kompleks')} className="mt-1 w-4 h-4 text-blue-700 focus:ring-blue-600 rounded border-gray-300" />
+                                        <span className="ml-3 text-sm sm:text-base text-slate-800">{opt}</span>
+                                    </label>
+                                ))}
+
+                                {q.type === 'menjodohkan' && (
+                                    <MatchingQuestion 
+                                        question={q} 
+                                        currentAnswers={localAnswers[q.id] || []} 
+                                        onMatch={(left, right) => handleAnswerChange(q.id, {left, right}, 'menjodohkan')} 
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between items-center mt-6">
+                            <button onClick={() => setCurrentQIndex(Math.max(0, currentQIndex - 1))} disabled={currentQIndex === 0} className="px-5 py-2.5 bg-slate-200 text-slate-700 rounded-lg disabled:opacity-40 hover:bg-slate-300 transition text-sm font-medium">
+                                <i className="fas fa-chevron-left mr-2"></i> Sebelumnya
+                            </button>
+                            
+                            {currentQIndex < questions.length - 1 ? (
+                                <button onClick={() => setCurrentQIndex(currentQIndex + 1)} className="px-5 py-2.5 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition text-sm font-medium">
+                                    Selanjutnya <i className="fas fa-chevron-right ml-2"></i>
+                                </button>
+                            ) : (
+                                <button onClick={() => setShowConfirmSubmit(true)} className="px-6 py-2.5 bg-emerald-700 text-white font-bold rounded-lg hover:bg-emerald-800 transition shadow text-sm">
+                                    Selesai & Kumpulkan
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="w-full md:w-80 flex-shrink-0">
+                        <div className="bg-white rounded-xl shadow p-4 sticky top-4 border border-slate-200">
+                            <h4 className="font-semibold text-slate-800 mb-3 border-b pb-2">Navigasi Soal (1 - 40)</h4>
+                            <div className="grid grid-cols-5 gap-2 max-h-[55vh] overflow-y-auto pr-1">
+                                {navButtons}
+                            </div>
+                            
+                            <div className="mt-5 pt-4 border-t space-y-2 text-xs text-slate-600">
+                                <div className="flex items-center gap-2"><div className="w-3.5 h-3.5 bg-emerald-700 rounded"></div> Sudah dijawab</div>
+                                <div className="flex items-center gap-2"><div className="w-3.5 h-3.5 bg-amber-400 rounded"></div> Dijawab sebagian</div>
+                                <div className="flex items-center gap-2"><div className="w-3.5 h-3.5 bg-white border border-slate-300 rounded"></div> Belum dijawab</div>
+                            </div>
+
+                            <button onClick={() => setShowConfirmSubmit(true)} className="w-full mt-5 px-4 py-2.5 bg-emerald-100 text-emerald-900 border border-emerald-300 font-semibold rounded-lg hover:bg-emerald-200 transition text-sm">
+                                Akhiri & Kumpulkan Ujian
+                            </button>
+                        </div>
+                    </div>
+
+                    {showConfirmSubmit && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+                                <h3 className="text-xl font-bold mb-3 text-slate-900">Konfirmasi Pengumpulan</h3>
+                                <p className="mb-6 text-slate-600 text-sm">Apakah Anda yakin ingin mengakhiri dan mengumpulkan ujian? Waktu tersisa: <strong>{formatTime()}</strong>.</p>
+                                <div className="flex gap-3 justify-end">
+                                    <button onClick={() => setShowConfirmSubmit(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded transition text-sm font-medium">Batal</button>
+                                    <button onClick={() => submitExam(false)} className="px-5 py-2 bg-emerald-700 text-white font-bold rounded hover:bg-emerald-800 transition text-sm shadow">Ya, Kumpulkan</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function MatchingQuestion({ question, currentAnswers, onMatch }) {
+            const [selectedLeft, setSelectedLeft] = useState(null);
+            const [rightOptions, setRightOptions] = useState([]);
+            
+            useEffect(() => {
+                const rights = question.pairs.map(p => p.right);
+                for (let i = rights.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [rights[i], rights[j]] = [rights[j], rights[i]];
+                }
+                setRightOptions(rights);
+            }, [question]);
+
+            const handleLeftClick = (text) => {
+                if (selectedLeft === text) setSelectedLeft(null);
+                else setSelectedLeft(text);
+            };
+
+            const handleRightClick = (rightText) => {
+                if (!selectedLeft) return;
+                onMatch(selectedLeft, rightText);
+                setSelectedLeft(null);
+            };
+
+            return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative select-none">
+                    <div className="space-y-3">
+                        <h4 className="font-semibold text-slate-700 text-center text-sm mb-1">Pernyataan</h4>
+                        {question.pairs.map((pair, idx) => {
+                            const isSelected = selectedLeft === pair.left;
+                            const currentMatch = currentAnswers.find(a => a.left === pair.left);
+                            const hasMatch = !!currentMatch;
+                            
+                            return (
+                                <div key={`l-${idx}`} 
+                                    onClick={() => handleLeftClick(pair.left)}
+                                    className={`match-item p-3 rounded-lg border-2 flex justify-between items-center bg-white z-10 relative text-xs sm:text-sm
+                                        ${isSelected ? 'selected border-emerald-700 shadow-md ring-2 ring-emerald-200' : 'border-slate-300 hover:border-slate-400'}
+                                        ${hasMatch && !isSelected ? 'border-blue-400 bg-blue-50' : ''}`
+                                    }>
+                                    <span>{pair.left}</span>
+                                    {hasMatch && <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full"><i className="fas fa-link"></i> Terhubung</span>}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="space-y-3">
+                         <h4 className="font-semibold text-slate-700 text-center text-sm mb-1">Pilihan Pasangan</h4>
+                        {rightOptions.map((text, idx) => {
+                            const matchedBy = currentAnswers.find(a => a.right === text);
+                            const isMatched = !!matchedBy;
+                            const isTarget = selectedLeft !== null && !isMatched;
+
+                            return (
+                                <div key={`r-${idx}`}
+                                    onClick={() => isTarget ? handleRightClick(text) : null}
+                                    className={`match-item p-3 rounded-lg border-2 bg-white z-10 relative text-xs sm:text-sm text-center flex flex-col justify-center
+                                        ${isMatched ? 'border-blue-400 bg-slate-100 text-slate-500 cursor-not-allowed' : 'border-slate-300'}
+                                        ${isTarget ? 'hover:border-emerald-700 hover:bg-emerald-50 cursor-pointer border-dashed' : ''}
+                                    `}>
+                                    {text}
+                                    {isMatched && <div className="text-[10px] text-blue-700 mt-1 truncate">Pasangan: {matchedBy.left}</div>}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        }
+
+        function ResultView({ examData, user, setView }) {
+            const kkm = 80;
+            const score = examData.score || 0;
+            const isPass = score >= kkm;
+
+            const timeMin = Math.floor(examData.timeSpent / 60);
+            const timeSec = examData.timeSpent % 60;
+
+            const handlePrint = () => {
+                window.print();
+            };
+
+            return (
+                <div className="max-w-3xl mx-auto mt-6">
+                    <div className="bg-white rounded-xl shadow-lg overflow-hidden border-t-8 border-emerald-700 print-only:border-0 print-only:shadow-none">
+                        
+                        <div className="p-8 text-center border-b">
+                            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1 uppercase tracking-wider">Hasil Penilaian Tengah Semester</h2>
+                            <p className="text-slate-600 text-sm">Mata Pelajaran: Al-Qur'an Hadist Kelas IX</p>
+                            <p className="text-xs sm:text-sm font-semibold text-emerald-800 mt-1">MTs. Mu'allimin NU Kota Malang</p>
+                            <p className="text-xs text-slate-500 mt-1">Disusun oleh: Damat, S. Ag., S. Pd.</p>
+                        </div>
+
+                        <div className="p-6 sm:p-8">
+                            <div className="flex flex-col md:flex-row gap-8 items-center justify-between mb-8">
+                                <div className="flex-1 space-y-3 w-full">
+                                    <div className="grid grid-cols-3 border-b border-slate-100 pb-2 text-sm">
+                                        <span className="text-slate-500 font-medium col-span-1">Nama Siswa</span>
+                                        <span className="text-slate-900 font-bold col-span-2">: {user.name}</span>
+                                    </div>
+                                    <div className="grid grid-cols-3 border-b border-slate-100 pb-2 text-sm">
+                                        <span className="text-slate-500 font-medium col-span-1">Kelas / Presensi</span>
+                                        <span className="text-slate-900 font-bold col-span-2">: {user.kelas} / No. {user.presensi}</span>
+                                    </div>
+                                    <div className="grid grid-cols-3 border-b border-slate-100 pb-2 text-sm">
+                                        <span className="text-slate-500 font-medium col-span-1">Waktu Pengerjaan</span>
+                                        <span className="text-slate-900 font-bold col-span-2">: {timeMin} menit {timeSec} detik</span>
+                                    </div>
+                                </div>
+                                
+                                <div className={`w-36 h-36 rounded-full border-8 flex flex-col items-center justify-center bg-slate-50 flex-shrink-0
+                                    ${isPass ? 'border-emerald-600' : 'border-red-400'}`}>
+                                    <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Nilai Akhir</span>
+                                    <span className={`text-4xl font-black ${isPass ? 'text-emerald-700' : 'text-red-500'}`}>
+                                        {score}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className={`p-4 rounded-lg text-center font-bold text-base mb-6 ${isPass ? 'bg-emerald-100 text-emerald-900' : 'bg-red-100 text-red-900'}`}>
+                                {isPass ? (
+                                    <><i className="fas fa-check-circle mr-2"></i> Mumtaz! Anda telah mencapai KKM (80).</>
+                                ) : (
+                                    <><i className="fas fa-times-circle mr-2"></i> Belum mencapai KKM (80). Tetap semangat belajar!</>
+                                )}
+                            </div>
+
+                            <div className="bg-slate-50 p-4 rounded-lg text-xs sm:text-sm text-slate-600 border">
+                                <p><strong>Keterangan:</strong> Sertifikat hasil asesmen ini sah sebagai rekapitulasi nilai ujian tengah semester berbasis digital.</p>
+                                <p className="mt-1 text-xs text-slate-500 print-only:block hidden">Waktu Cetak: {new Date().toLocaleString('id-ID')}</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-100 p-4 flex gap-4 justify-center no-print">
+                            <button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition shadow text-sm flex items-center gap-2">
+                                <i className="fas fa-print"></i> Cetak / Unduh PDF
+                            </button>
+                            <button onClick={() => setView('student_dashboard')} className="bg-slate-700 hover:bg-slate-800 text-white px-5 py-2.5 rounded-lg font-medium transition shadow text-sm">
+                                Kembali ke Beranda
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function AdminDashboard({ setView, user, setExamData, questions, appSettings, setAppSettings }) {
+            const [usersData, setUsersData] = useState({});
+
+            useEffect(() => {
+                const storedUsers = JSON.parse(localStorage.getItem('alquranExamUsers') || '{}');
+                setUsersData(storedUsers);
+            }, []);
+
+            const testAsStudent = () => {
+                setExamData({
+                    answers: {},
+                    startTime: Date.now(),
+                    timeLimit: 90 * 60,
+                    isFinished: false
+                });
+                setView('exam');
+            };
+
+            const updateSettings = (e) => {
+                e.preventDefault();
+                localStorage.setItem('alquranExamSettings', JSON.stringify(appSettings));
+                alert('Pengaturan admin berhasil disimpan!');
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="bg-white rounded-xl shadow p-6 border border-slate-200">
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Panel Guru / Administrator</h2>
+                        <p className="text-slate-600 text-sm mb-6">Kelola bank soal, pantau nilai siswa, uji coba asesmen, dan pengaturan keamanan.</p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 flex flex-col justify-between">
+                                <div>
+                                    <h3 className="font-bold text-emerald-900 text-base mb-1"><i className="fas fa-book mr-2"></i>Bank Soal</h3>
+                                    <p className="text-xs text-emerald-700 mb-4">Total: {questions.length} Soal (15 PG, 15 PGK, 10 Menjodohkan)</p>
+                                </div>
+                                <button onClick={() => setView('admin_edit')} className="bg-emerald-700 text-white w-full py-2 rounded-lg hover:bg-emerald-800 transition font-medium text-sm">Edit Bank Soal</button>
+                            </div>
+                            
+                            <div className="bg-purple-50 border border-purple-200 rounded-xl p-5 flex flex-col justify-between">
+                                <div>
+                                    <h3 className="font-bold text-purple-900 text-base mb-1"><i className="fas fa-laptop-code mr-2"></i>Uji Coba Soal</h3>
+                                    <p className="text-xs text-purple-700 mb-4">Simulasikan pengerjaan tes layaknya siswa.</p>
+                                </div>
+                                <button onClick={testAsStudent} className="bg-purple-700 text-white w-full py-2 rounded-lg hover:bg-purple-800 transition font-medium text-sm">Mulai Simulasi</button>
+                            </div>
+
+                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 flex flex-col justify-between">
+                                <div>
+                                    <h3 className="font-bold text-blue-900 text-base mb-1"><i className="fas fa-users mr-2"></i>Data Siswa</h3>
+                                    <p className="text-xs text-blue-700 mb-4">{Object.keys(usersData).length} siswa telah tercatat di database.</p>
+                                </div>
+                                <button onClick={() => alert('Data siswa tersimpan aman di LocalStorage browser.')} className="bg-blue-600 text-white w-full py-2 rounded-lg hover:bg-blue-700 transition font-medium text-sm">Lihat Rekap</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow p-6 border border-slate-200">
+                        <h3 className="text-base font-bold text-slate-900 mb-4 border-b pb-2">Pengaturan Administrator</h3>
+                        <form onSubmit={updateSettings} className="max-w-md space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Ganti Password Admin</label>
+                                <input type="text" className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-600 text-sm" 
+                                    value={appSettings.adminPassword} 
+                                    onChange={(e) => setAppSettings({...appSettings, adminPassword: e.target.value})} />
+                                <p className="text-xs text-slate-500 mt-1">Default awal: admin123</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">URL Logo Madrasah (Opsional)</label>
+                                <input type="url" className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-600 text-sm" 
+                                    placeholder="https://example.com/logo.png"
+                                    value={appSettings.logo} 
+                                    onChange={(e) => setAppSettings({...appSettings, logo: e.target.value})} />
+                            </div>
+                            <button type="submit" className="bg-slate-800 text-white px-4 py-2.5 rounded-lg hover:bg-slate-900 transition font-medium text-sm">Simpan Pengaturan</button>
+                        </form>
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow p-6 border border-slate-200">
+                        <h3 className="text-base font-bold text-slate-900 mb-4 border-b pb-2">Log Pengerjaan Siswa</h3>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-slate-50 text-slate-700 border-b">
+                                    <tr>
+                                        <th className="p-3">Nama Siswa</th>
+                                        <th className="p-3">Kelas / Presensi</th>
+                                        <th className="p-3 text-center">Percobaan</th>
+                                        <th className="p-3 text-center">Nilai Tertinggi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {Object.values(usersData).length === 0 ? (
+                                        <tr><td colSpan="4" className="p-4 text-center text-slate-500 italic">Belum ada data pengerjaan siswa.</td></tr>
+                                    ) : (
+                                        Object.values(usersData).map((u, i) => (
+                                            <tr key={i} className="border-b hover:bg-slate-50">
+                                                <td className="p-3 font-medium">{u.name}</td>
+                                                <td className="p-3">{u.kelas} / No. {u.presensi}</td>
+                                                <td className="p-3 text-center">{u.attempts}</td>
+                                                <td className="p-3 text-center font-bold text-emerald-700">
+                                                    {u.scores && u.scores.length > 0 ? Math.max(...u.scores.map(s => s.score)) : '-'}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function AdminEditQuestions({ questions, setQuestions, setView }) {
+            const handleSaveAll = () => {
+                localStorage.setItem('alquranExamQuestions', JSON.stringify(questions));
+                alert('Bank soal berhasil disimpan!');
+            };
+
+            const handleResetDefault = () => {
+                if(confirm("Kembalikan soal ke bank soal awal Al-Qur'an Hadist?")) {
+                    setQuestions(INITIAL_QUESTIONS);
+                    localStorage.removeItem('alquranExamQuestions');
+                }
+            };
+
+            return (
+                <div className="bg-white rounded-xl shadow p-6 border border-slate-200">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
+                        <div>
+                            <h2 className="text-xl font-bold text-slate-900">Kelola Bank Soal Al-Qur'an Hadist</h2>
+                            <p className="text-slate-600 text-xs">Edit struktur JSON untuk penyesuaian soal secara fleksibel.</p>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                             <button onClick={handleResetDefault} className="px-3.5 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 text-xs font-medium transition">Reset Default</button>
+                            <button onClick={() => setView('admin_dashboard')} className="px-3.5 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 text-xs font-medium transition">Kembali</button>
+                            <button onClick={handleSaveAll} className="px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 text-xs font-medium transition shadow">Simpan Perubahan</button>
+                        </div>
+                    </div>
+
+                    <div className="bg-slate-900 rounded-xl p-4 font-mono text-xs sm:text-sm text-emerald-400 overflow-auto h-[550px] w-full">
+                        <textarea 
+                            className="w-full h-full bg-transparent border-none outline-none resize-none"
+                            value={JSON.stringify(questions, null, 2)}
+                            onChange={(e) => {
+                                try {
+                                    setQuestions(JSON.parse(e.target.value));
+                                } catch (err) {}
+                            }}
+                            spellCheck="false"
+                        />
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
